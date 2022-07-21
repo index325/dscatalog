@@ -3,8 +3,11 @@ package com.index325.dscatalog.services;
 import com.index325.dscatalog.dto.CategoryDTO;
 import com.index325.dscatalog.entities.Category;
 import com.index325.dscatalog.repositories.CategoryRepository;
+import com.index325.dscatalog.services.exceptions.DatabaseException;
 import com.index325.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,5 +68,17 @@ public class CategoryService {
             throw new ResourceNotFoundException("Such category was not found");
         }
 
+    }
+
+    public void delete(Long id) {
+        try {
+            categoryRepository.deleteById(id);
+        }
+        catch (EmptyResultDataAccessException e){
+            throw new ResourceNotFoundException("This category that you`re trying to delete was not found");
+        }
+        catch (DataIntegrityViolationException e){
+            throw new DatabaseException("Integrity violation check your request and try again");
+        }
     }
 }

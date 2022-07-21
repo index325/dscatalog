@@ -50,12 +50,13 @@ public class CategoryResource {
     public ResponseEntity<CategoryDTO> update(@RequestBody CategoryDTO dto, @PathVariable Long id) {
         dto = categoryService.update(id, dto);
 
-        URI uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(dto.getId())
-                .toUri();
+        return ResponseEntity.ok().body(dto);
+    }
 
-        return ResponseEntity.created(uri).body(dto);
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<CategoryDTO> delete(@PathVariable Long id) {
+        categoryService.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
