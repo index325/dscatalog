@@ -3,12 +3,13 @@ package com.index325.dscatalog.services;
 import com.index325.dscatalog.dto.CategoryDTO;
 import com.index325.dscatalog.entities.Category;
 import com.index325.dscatalog.repositories.CategoryRepository;
-import com.index325.dscatalog.services.exceptions.EntityNotFoundException;
+import com.index325.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,5 +50,20 @@ public class CategoryService {
         entity = categoryRepository.save(entity);
 
         return new CategoryDTO(entity);
+    }
+
+    @Transactional
+    public CategoryDTO update(Long id, CategoryDTO dto) {
+        try {
+            Category entity = categoryRepository.getReferenceById(id);
+            entity.setName(dto.getName());
+
+            entity = categoryRepository.save(entity);
+
+            return new CategoryDTO(entity);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Such category was not found");
+        }
+
     }
 }
