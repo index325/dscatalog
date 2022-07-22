@@ -1,7 +1,10 @@
 package com.index325.dscatalog.services;
 
+import com.index325.dscatalog.dto.CategoryDTO;
 import com.index325.dscatalog.dto.ProductDTO;
+import com.index325.dscatalog.entities.Category;
 import com.index325.dscatalog.entities.Product;
+import com.index325.dscatalog.repositories.CategoryRepository;
 import com.index325.dscatalog.repositories.ProductRepository;
 import com.index325.dscatalog.repositories.ProductRepository;
 import com.index325.dscatalog.services.exceptions.DatabaseException;
@@ -23,6 +26,9 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     @Transactional(readOnly = true)
     public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
         Page<Product> categories = productRepository.findAll(pageRequest);
@@ -42,7 +48,7 @@ public class ProductService {
     @Transactional
     public ProductDTO insert(ProductDTO dto) {
         Product entity = new Product();
-
+        copyDtoToEntity(dto, entity);
 //        entity.setName(dto.getName());
 
         entity = productRepository.save(entity);
@@ -54,6 +60,7 @@ public class ProductService {
     public ProductDTO update(Long id, ProductDTO dto) {
         try {
             Product entity = productRepository.getReferenceById(id);
+            copyDtoToEntity(dto, entity);
 //            entity.setName(dto.getName());
 
             entity = productRepository.save(entity);
@@ -74,6 +81,21 @@ public class ProductService {
         }
         catch (DataIntegrityViolationException e){
             throw new DatabaseException("Integrity violation check your request and try again");
+        }
+    }
+
+    private void copyDtoToEntity(ProductDTO dto, Product entity) {
+        entity.setName(dto.getName());
+        entity.setDate(dto.getDate());
+        entity.setDescription(dto.getDescription());
+        entity.setPrice(dto.getPrice());
+        entity.setImgUrl(dto.getImgUrl());
+
+        entity.getCategories().clear();
+
+        for (CategoryDTO categoryDTO: dto.getCategories()){
+            Category category = categoryRepository.getReferenceById(categoryDTO.getId());
+            entity.getCategories().add(category);
         }
     }
 }
